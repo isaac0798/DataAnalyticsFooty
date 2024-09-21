@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 def foo():
-    st.write("Stoke vs Leiceiser - 15/16")
+    st.write("Stoke vs Leiceister - 15/16")
     with open('./match_data.json') as f:
         match_data = json.load(f)
         print('hi')
@@ -21,9 +21,15 @@ def foo():
                 players_who_passed[match_event["player"]["name"]] = 1
 
         print(players_who_passed)
-        st.write(pd.DataFrame({
+        pass_counter = pd.DataFrame({
             'Players': list(players_who_passed.keys()),
             'Passes': [players_who_passed[key] for key in players_who_passed.keys()]
-        }))
+        })
+
+        option = st.selectbox(
+            'Which number do you like best?',
+             pass_counter['Players'])
+
+        'Passes: ', players_who_passed[option]
 
 foo();
