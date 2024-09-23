@@ -39,7 +39,7 @@ def foo():
         })
 
         option = st.selectbox(
-            'Which number do you like best?',
+            'Player Options:',
              pass_counter['Players'])
 
         'Passes: ', players_who_passed[option]['count']
