@@ -2,6 +2,7 @@ import json
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw
 
 def foo():
@@ -21,7 +22,8 @@ def foo():
                 players_who_passed[plyr]['passes'].append(
                         {
                                 "location": match_event["location"],
-                                "end_location": match_event["pass"]["end_location"]
+                                "end_location": match_event["pass"]["end_location"],
+                                "outcome": match_event["pass"]["outcome"]["name"] if 'outcome' in match_event["pass"] else "Complete"
                         }
                         )
             else:
@@ -29,7 +31,8 @@ def foo():
                         "count": 1,
                         "passes": [{
                                 "location": match_event["location"],
-                                "end_location": match_event["pass"]["end_location"]
+                                "end_location": match_event["pass"]["end_location"],
+                                "outcome": match_event["pass"]["outcome"]["name"] if 'outcome' in match_event["pass"] else "Complete"
                             }]
                         }
 
@@ -42,20 +45,59 @@ def foo():
             'Player Options:',
              pass_counter['Players'])
 
-        'Passes: ', players_who_passed[option]['count']
+        'Passes: ', players_who_passed[option]
 
-        pitch = Image.new("RGB", (1500,600), "green")
+        pitch = Image.new("RGB", (120,100), "green")
 
         passes = []
 
         for x in (players_who_passed[option]['passes']):
-            passes.append([(x['location'][0] * 5, x['location'][1] * 10), (x['end_location'][0] * 10, x['end_location'][1] * 10)])
+            passes.append([(x['location'][0], x['location'][1]), (x['end_location'][0], x['end_location'][1])])
 
-        print(passes)
         for p in passes:
             draw = ImageDraw.Draw(pitch)
             draw.line(p, width=1,fill="white")
         pitch.save('./pitch.png')
+
+        players = tuple(players_who_passed.keys())
+        completed_passes = []
+        incomplete_passes = []
+
+        for player in players_who_passed.keys():
+            if player != option:
+                continue
+
+            completedPassses = 0
+            incompletedPasses = 0
+
+            for p in players_who_passed[player]['passes']:
+                if p['outcome'] == 'Complete':
+                    completedPassses += 1
+                elif p['outcome'] == 'Incomplete':
+                    incompletedPasses += 1
+            
+            completed_passes.append(completedPassses)
+            incomplete_passes.append(incompletedPasses)
+
+
+        weight_counts = {
+            "Complete": np.array(completed_passes),
+            "Incomplete": np.array(incomplete_passes),
+        }
+        width = 0.5
+
+        fig, ax = plt.subplots()
+        bottom = np.zeros(1)
+
+        for boolean, weight_count in weight_counts.items():
+            print(boolean)
+            print(weight_count)
+            p = ax.bar(option, weight_count, width, label=boolean, bottom=bottom)
+            bottom += weight_count
+
+        ax.set_title("Number of passes")
+        ax.legend(loc="upper right")
+        st.pyplot(fig)
 
         st.image('./pitch.png')
 
