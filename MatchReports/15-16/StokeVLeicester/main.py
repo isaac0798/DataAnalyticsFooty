@@ -4,9 +4,23 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw
+from typing import List, Optional
+from uuid import UUID
+from datetime import datetime
 
 def foo():
+    '''
+        GOAL:
+            -match statistics
+                -total passes
+                -total shots
+                -dribbles
+                -goals
+
+
+    '''
     st.write("Stoke vs Leiceister - 15/16")
+    
     with open('./match_data.json') as f:
         match_data = json.load(f)
         st.write("Pass Counter")
@@ -101,4 +115,150 @@ def foo():
 
         st.image('./pitch.png')
 
-foo();
+class PlayPattern:
+    id: int
+    name: str
+
+    def __init__(self, id: int, name: str) -> None:
+        self.id = id
+        self.name = name
+
+
+class BallReceipt:
+    outcome: PlayPattern
+
+    def __init__(self, outcome: PlayPattern) -> None:
+        self.outcome = outcome
+
+
+class Carry:
+    end_location: List[float]
+
+    def __init__(self, end_location: List[float]) -> None:
+        self.end_location = end_location
+
+
+class Clearance:
+    body_part: PlayPattern
+    left_foot: bool
+
+    def __init__(self, body_part: PlayPattern, left_foot: bool) -> None:
+        self.body_part = body_part
+        self.left_foot = left_foot
+
+
+class Duel:
+    type: PlayPattern
+
+    def __init__(self, type: PlayPattern) -> None:
+        self.type = type
+
+
+class Lineup:
+    player: PlayPattern
+    position: PlayPattern
+    jersey_number: int
+
+    def __init__(self, player: PlayPattern, position: PlayPattern, jersey_number: int) -> None:
+        self.player = player
+        self.position = position
+        self.jersey_number = jersey_number
+
+
+class Tactics:
+    formation: int
+    lineup: List[Lineup]
+
+    def __init__(self, formation: int, lineup: List[Lineup]) -> None:
+        self.formation = formation
+        self.lineup = lineup
+
+
+class Pass:
+    recipient: PlayPattern
+    length: float
+    angle: float
+    height: PlayPattern
+    end_location: List[float]
+    body_part: Optional[PlayPattern]
+    type: Optional[PlayPattern]
+    outcome: Optional[PlayPattern]
+    aerial_won: Optional[bool]
+
+    def __init__(self, recipient: PlayPattern, length: float, angle: float, height: PlayPattern, end_location: List[float], body_part: Optional[PlayPattern], type: Optional[PlayPattern], outcome: Optional[PlayPattern], aerial_won: Optional[bool]) -> None:
+        self.recipient = recipient
+        self.length = length
+        self.angle = angle
+        self.height = height
+        self.end_location = end_location
+        self.body_part = body_part
+        self.type = type
+        self.outcome = outcome
+        self.aerial_won = aerial_won
+
+
+class MatchEvent:
+    id: UUID
+    index: int
+    period: int
+    timestamp: datetime
+    minute: int
+    second: int
+    type: PlayPattern
+    possession: int
+    possession_team: PlayPattern
+    play_pattern: PlayPattern
+    team: PlayPattern
+    duration: Optional[float]
+    tactics: Optional[Tactics]
+    related_events: Optional[List[UUID]]
+    player: Optional[PlayPattern]
+    position: Optional[PlayPattern]
+    location: Optional[List[float]]
+    welcome_pass: Optional[Pass]
+    carry: Optional[Carry]
+    ball_receipt: Optional[BallReceipt]
+    under_pressure: Optional[bool]
+    duel: Optional[Duel]
+    counterpress: Optional[bool]
+    out: Optional[bool]
+    clearance: Optional[Clearance]
+
+    def __init__(self, id: UUID, index: int, period: int, timestamp: datetime, minute: int, second: int, type: PlayPattern, possession: int, possession_team: PlayPattern, play_pattern: PlayPattern, team: PlayPattern, duration: Optional[float], tactics: Optional[Tactics], related_events: Optional[List[UUID]], player: Optional[PlayPattern], position: Optional[PlayPattern], location: Optional[List[float]], welcome_pass: Optional[Pass], carry: Optional[Carry], ball_receipt: Optional[BallReceipt], under_pressure: Optional[bool], duel: Optional[Duel], counterpress: Optional[bool], out: Optional[bool], clearance: Optional[Clearance]) -> None:
+        self.id = id
+        self.index = index
+        self.period = period
+        self.timestamp = timestamp
+        self.minute = minute
+        self.second = second
+        self.type = type
+        self.possession = possession
+        self.possession_team = possession_team
+        self.play_pattern = play_pattern
+        self.team = team
+        self.duration = duration
+        self.tactics = tactics
+        self.related_events = related_events
+        self.player = player
+        self.position = position
+        self.location = location
+        self.welcome_pass = welcome_pass
+        self.carry = carry
+        self.ball_receipt = ball_receipt
+        self.under_pressure = under_pressure
+        self.duel = duel
+        self.counterpress = counterpress
+        self.out = out
+        self.clearance = clearance
+
+
+def run():
+    st.write('Stoke vs Leicester')
+
+    with open('./match_data.json') as f:
+        match_data: List[MatchEvent] = json.load(f)
+    
+    for match_event in match_data:
+        print(match_event)
+        pass
+run()
