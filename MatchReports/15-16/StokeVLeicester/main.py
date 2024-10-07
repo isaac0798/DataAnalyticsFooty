@@ -199,16 +199,16 @@ class Pass:
 
 class MatchEvent:
     id: UUID
-    index: int
-    period: int
-    timestamp: datetime
-    minute: int
-    second: int
-    type: PlayPattern
-    possession: int
-    possession_team: PlayPattern
-    play_pattern: PlayPattern
-    team: PlayPattern
+    index: Optional[int]
+    period: Optional[int]
+    timestamp: Optional[datetime]
+    minute: Optional[int]
+    second: Optional[int]
+    type: Optional[PlayPattern]
+    possession: Optional[int]
+    possession_team: Optional[PlayPattern]
+    play_pattern: Optional[PlayPattern]
+    team: Optional[PlayPattern]
     duration: Optional[float]
     tactics: Optional[Tactics]
     related_events: Optional[List[UUID]]
@@ -256,8 +256,8 @@ def run():
     st.write('Stoke vs Leicester')
 
     with open('./match_data.json') as f:
-        match_data: List[MatchEvent] = json.load(f)
-    
+        match_data = json.load(f)
+
     for match_event in match_data:
         print(match_event)
         pass
