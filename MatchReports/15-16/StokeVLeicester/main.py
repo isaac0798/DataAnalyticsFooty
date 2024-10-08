@@ -253,12 +253,39 @@ class MatchEvent:
 
 
 def run():
-    st.write('Stoke vs Leicester')
+    st.header('Stoke vs Leicester')
 
     with open('./match_data.json') as f:
         match_data = json.load(f)
 
+    goals = []
+    home_team = 'Stoke City'
+    away_team = 'Leicester City'
     for match_event in match_data:
-        print(match_event)
+        if 'shot' in match_event:
+            if match_event['shot']['outcome']['name'] == 'Goal':
+                goals.append(match_event)
         pass
+
+    home_goals = []
+    away_goals = []
+    for goal in goals:
+        if goal['team']['name'] == home_team:
+            home_goals.append(goal)
+        else:
+            away_goals.append(goal)
+
+    with st.container():
+        st.subheader(f'{home_team}: {len(home_goals)} v {away_team}: {len(away_goals)}')
+        col1, col2 = st.columns(2)
+
+        with col1:
+            for goal in home_goals:
+                st.write(goal['player']['name'])
+                st.write(goal['timestamp'])
+
+        with col2:
+            for goal in away_goals:
+                st.write(goal['player']['name'])
+                st.write(goal['timestamp'])
 run()
