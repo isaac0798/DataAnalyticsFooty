@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
+from collections import defaultdict
 
 def foo():
     '''
@@ -259,12 +260,15 @@ def run():
         match_data = json.load(f)
 
     goals = []
+    passes = []
     home_team = 'Stoke City'
     away_team = 'Leicester City'
     for match_event in match_data:
         if 'shot' in match_event:
             if match_event['shot']['outcome']['name'] == 'Goal':
                 goals.append(match_event)
+        if 'pass' in match_event:
+            passes.append(match_event)
         pass
 
     home_goals = []
@@ -274,6 +278,14 @@ def run():
             home_goals.append(goal)
         else:
             away_goals.append(goal)
+
+    home_passes = []
+    away_passes = []
+    for p in passes:
+        if p['possession_team']['name'] == home_team:
+            home_passes.append(p)
+        else:
+            away_passes.append(p)
 
     with st.container():
         st.subheader(f'{home_team}: {len(home_goals)} v {away_team}: {len(away_goals)}')
@@ -288,4 +300,83 @@ def run():
             for goal in away_goals:
                 st.write(goal['player']['name'])
                 st.write(goal['timestamp'])
+
+    with st.container():
+        st.subheader('Passing Leaders')
+        col1, col2 = st.columns(2)
+
+        players_who_passed_home = {}
+        for home_pass in home_passes:
+            plyr = home_pass["player"]["name"];
+            if plyr in players_who_passed_home:
+                players_who_passed_home[plyr]['count'] = players_who_passed_home[plyr]['count'] + 1
+                players_who_passed_home[plyr]['passes'].append(
+                        {
+                                "location": home_pass["location"],
+                                "end_location": home_pass["pass"]["end_location"],
+                                "outcome": home_pass["pass"]["outcome"]["name"] if 'outcome' in home_pass["pass"] else "Complete"
+                        }
+                        )
+            else:
+                players_who_passed_home[plyr] = {
+                        "count": 1,
+                        "passes": [{
+                                "location": home_pass["location"],
+                                "end_location": home_pass["pass"]["end_location"],
+                                "outcome": home_pass["pass"]["outcome"]["name"] if 'outcome' in home_pass["pass"] else "Complete"
+                            }]
+                        }
+
+        players_who_passed_away = {}
+        for away_pass in away_passes:
+            plyr = away_pass["player"]["name"];
+            if plyr in players_who_passed_away:
+                players_who_passed_away[plyr]['count'] = players_who_passed_away[plyr]['count'] + 1
+                players_who_passed_away[plyr]['passes'].append(
+                        {
+                                "location": away_pass["location"],
+                                "end_location": away_pass["pass"]["end_location"],
+                                "outcome": away_pass["pass"]["outcome"]["name"] if 'outcome' in away_pass["pass"] else "Complete"
+                        }
+                        )
+            else:
+                players_who_passed_away[plyr] = {
+                        "count": 1,
+                        "passes": [{
+                                "location": away_pass["location"],
+                                "end_location": away_pass["pass"]["end_location"],
+                                "outcome": away_pass["pass"]["outcome"]["name"] if 'outcome' in away_pass["pass"] else "Complete"
+                            }]
+                        }
+
+
+        completed_passes = defaultdict(int)
+
+        for player, info in players_who_passed_home.items():
+            for pass_info in info['passes']:
+                if pass_info['outcome'] == 'Complete':
+                    completed_passes[player] += 1
+
+        sorted_players = sorted(completed_passes.items(), key=lambda x: x[1], reverse=True)
+
+        top_3_passers = sorted_players[:3]
+
+        with col1:
+            for i, (player, passes) in enumerate(top_3_passers, 1):
+                st.write(f"{i}. {player}: {passes} completed passes")
+
+        completed_passes_away = defaultdict(int)
+
+        for player, info in players_who_passed_away.items():
+            for pass_info in info['passes']:
+                if pass_info['outcome'] == 'Complete':
+                    completed_passes_away[player] += 1
+
+        sorted_players_away = sorted(completed_passes_away.items(), key=lambda x: x[1], reverse=True)
+
+        top_3_passers_away = sorted_players_away[:3]
+
+        with col2:
+            for i, (player, passes) in enumerate(top_3_passers_away, 1):
+                st.write(f"{i}. {player}: {passes} completed passes")
 run()
