@@ -261,15 +261,27 @@ def run():
 
     goals = []
     passes = []
+    tackles = []
     home_team = 'Stoke City'
     away_team = 'Leicester City'
+
     for match_event in match_data:
         if 'shot' in match_event:
             if match_event['shot']['outcome']['name'] == 'Goal':
                 goals.append(match_event)
         if 'pass' in match_event:
             passes.append(match_event)
+
+        if 'duel' in match_event:
+            if match_event['duel']['type']['name'] == 'Tackle':
+                if match_event['duel']['outcome'] == 'Lost In Play':
+                    continue
+                if match_event['duel']['outcome'] == 'Lost Out':
+                    continue
+
+                tackles.append(match_event)
         pass
+
 
     home_goals = []
     away_goals = []
@@ -287,19 +299,31 @@ def run():
         else:
             away_passes.append(p)
 
+    home_tackles = []
+    away_tackles = []
+    for tackle in tackles:
+        if tackle['team']['name'] == home_team:
+            home_tackles.append(tackle)
+        else:
+            away_tackles.append(tackle)
+
     with st.container():
         st.subheader(f'{home_team}: {len(home_goals)} v {away_team}: {len(away_goals)}')
         col1, col2 = st.columns(2)
 
         with col1:
             for goal in home_goals:
-                st.write(goal['player']['name'])
-                st.write(goal['timestamp'])
+                player = goal['player']['name']
+                timestamp = goal['timestamp']
+                
+                st.write(f'{player} - {timestamp}')
 
         with col2:
             for goal in away_goals:
-                st.write(goal['player']['name'])
-                st.write(goal['timestamp'])
+                player = goal['player']['name']
+                timestamp = goal['timestamp']
+                
+                st.write(f'{player} - {timestamp}')
 
     with st.container():
         st.subheader('Passing Leaders')
@@ -379,4 +403,36 @@ def run():
         with col2:
             for i, (player, passes) in enumerate(top_3_passers_away, 1):
                 st.write(f"{i}. {player}: {passes} completed passes")
+
+
+    with st.container():
+        st.subheader('Top Tacklers')
+        col1, col2 = st.columns(2)
+
+        with col1:
+            players_who_tackled_home = defaultdict(int)
+
+            for i, tackle in enumerate(home_tackles):
+                players_who_tackled_home[tackle['player']['name']] += 1
+
+            sorted_players = sorted(players_who_tackled_home.items(), key=lambda x: x[1], reverse=True)
+
+            top_3_tacklers = sorted_players[:3]
+
+            for i, (player, tackles) in enumerate(top_3_tacklers, 1):
+                st.write(f"{i}. {player}: {tackles} completed tackles")
+
+        with col2:
+            players_who_tackled_away = defaultdict(int)
+
+            for i, tackle in enumerate(away_tackles):
+                players_who_tackled_away[tackle['player']['name']] += 1
+
+            sorted_players = sorted(players_who_tackled_away.items(), key=lambda x: x[1], reverse=True)
+
+            top_3_tacklers = sorted_players[:3]
+
+            for i, (player, tackles) in enumerate(top_3_tacklers, 1):
+                st.write(f"{i}. {player}: {tackles} completed tackles")
+
 run()
