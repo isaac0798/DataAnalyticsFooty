@@ -41,13 +41,29 @@ for event in match_data:
   draw = ImageDraw.Draw(im)
   draw.text((0, 0), f"{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}")
 
+  ''' get location event '''
   startLocation = event['location']
   startLocationX = startLocation[0] * 10
   startLocationY = startLocation[1] * 10
 
-  print (startLocationX, startLocationY)
-
   draw.circle([startLocationX, startLocationY], 2, fill=(255, 255, 255, 255))
+
+  ''' get end location event '''
+  eventType = event['type']['name'].lower()
+
+  if eventType not in event:
+    print('cannot find event details')
+    draw.text((0, 10), f"cannot find event details: {eventType}")
+  else:
+    if 'end_location' in event[eventType]:
+      endLocation = event[eventType]['end_location']
+      endLocationX = endLocation[0] * 10
+      endLocationY = endLocation[1] * 10
+
+      draw.circle([endLocationX, endLocationY], 2, fill=(255, 255, 255, 255))
+    else:
+      print('No end location f')
+      draw.text((0, 10), f"No end location f")
 
   im.save(f"{gamePicturePath}/{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}.png")
 
