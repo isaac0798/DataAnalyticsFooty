@@ -4,6 +4,7 @@ import json
 import shutil
 import cv2
 from PIL import Image, ImageDraw
+from arrowedLine import arrowedLine
 
 args = sys.argv[1:]
 print(args[0])
@@ -33,6 +34,9 @@ else:
   os.makedirs(gamePicturePath)
 
 ''' generate image for each event timestamp_player_type_id'''
+eventsFound = 0
+failedEventsFound = 0
+
 for event in match_data:
   if 'location' not in event:
     continue
@@ -54,20 +58,28 @@ for event in match_data:
 
   if eventType not in event:
     print('cannot find event details')
+    failedEventsFound += 1
     draw.text((0, 10), f"cannot find event details: {eventType}")
   else:
+    print('found event')
+    eventsFound += 1
     if 'end_location' in event[eventType]:
       endLocation = event[eventType]['end_location']
       endLocationX = endLocation[0] * 10
       endLocationY = endLocation[1] * 10
 
       draw.circle([endLocationX, endLocationY], 2, fill=(255, 255, 255, 255))
+      draw.line([(startLocationX, startLocationY), (endLocationX, endLocationY)], fill=(255, 255, 255, 255), width=1)
+
+      im = arrowedLine(im, (startLocationX, startLocationY), (endLocationX, endLocationY), 1, (255, 255, 255))
     else:
       print('No end location f')
       draw.text((0, 10), f"No end location f")
 
   im.save(f"{gamePicturePath}/{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}.png")
 
+print('successful events', eventsFound)
+print('unsuccessful events', failedEventsFound)
 
 video_name = 'output_video.mp4'
 
