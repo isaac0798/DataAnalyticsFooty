@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 import cv2
+from collections import defaultdict
 from PIL import Image, ImageDraw
 from arrowedLine import arrowedLine
 
@@ -36,6 +37,7 @@ else:
 ''' generate image for each event timestamp_player_type_id'''
 eventsFound = 0
 failedEventsFound = 0
+failedEventTypes = defaultdict(int)
 
 for event in match_data:
   if 'location' not in event:
@@ -57,9 +59,10 @@ for event in match_data:
   eventType = event['type']['name'].lower()
 
   if eventType not in event:
-    print('cannot find event details')
+    print(f'cannot find event details: {eventType}')
     failedEventsFound += 1
     draw.text((0, 10), f"cannot find event details: {eventType}")
+    failedEventTypes[eventType] = failedEventTypes[eventType] + 1
   else:
     print('found event')
     eventsFound += 1
@@ -73,13 +76,15 @@ for event in match_data:
 
       im = arrowedLine(im, (startLocationX, startLocationY), (endLocationX, endLocationY), 1, (255, 255, 255))
     else:
-      print('No end location f')
-      draw.text((0, 10), f"No end location f")
+      print(f'No end location: {eventType}')
+      failedEventTypes[eventType] = failedEventTypes[eventType] + 1
+      draw.text((0, 10), f"No end location for: {eventType}")
 
   im.save(f"{gamePicturePath}/{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}_{eventType}.png")
 
 print('successful events', eventsFound)
 print('unsuccessful events', failedEventsFound)
+print(failedEventTypes)
 
 video_name = 'output_video.mp4'
 
