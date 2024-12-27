@@ -76,7 +76,7 @@ for event in match_data:
       print('No end location f')
       draw.text((0, 10), f"No end location f")
 
-  im.save(f"{gamePicturePath}/{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}.png")
+  im.save(f"{gamePicturePath}/{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}_{eventType}.png")
 
 print('successful events', eventsFound)
 print('unsuccessful events', failedEventsFound)
