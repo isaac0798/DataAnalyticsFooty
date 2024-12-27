@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import shutil
+import cv2
 from PIL import Image, ImageDraw
 
 args = sys.argv[1:]
@@ -21,7 +22,7 @@ for event in match_data:
 
 ''' create folder for game '''
 dirs = args[0].split('/')
-gamePicturePath = f'./MatchGeneratorResults/{dirs[1]}/{dirs[2]}'
+gamePicturePath = f'./MatchGeneratorResults/{dirs[1]}/{dirs[2]}/images'
 
 if not os.path.exists(gamePicturePath):
   os.makedirs(gamePicturePath)
@@ -67,7 +68,21 @@ for event in match_data:
 
   im.save(f"{gamePicturePath}/{event['timestamp']}_{event['player']['id']}_{event['type']['id']}_{event['id']}.png")
 
-print (maxX, maxY)
 
+video_name = 'output_video.mp4'
 
-''' use 3rd party software to make all images into a video'''
+images = [img for img in os.listdir(gamePicturePath) if img.endswith(".png")]
+
+first_image = cv2.imread(os.path.join(gamePicturePath, images[0]))
+height, width, _ = first_image.shape
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+video = cv2.VideoWriter(video_name, fourcc, 20, (width, height))
+
+for image in images:
+    img_path = os.path.join(gamePicturePath, image)
+    frame = cv2.imread(img_path)
+    video.write(frame)
+
+video.release()
+cv2.destroyAllWindows()
