@@ -33,6 +33,13 @@ with sqlite3.connect('./Questions/1/example.db') as conn:
             name TEXT NOT NULL
         );
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS type (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        );
+    ''')
     
     conn.commit()
     
@@ -51,6 +58,14 @@ with sqlite3.connect('./Questions/1/example.db') as conn:
         ''', (
           event['player']['id'],
           event['player']['name']
+        ))
+
+        cursor.execute('''
+          INSERT OR IGNORE INTO type (id, name)
+          VALUES (?, ?)
+        ''', (
+          event['type']['id'],
+          event['type']['name']
         ))
 
         if eventType not in event:
