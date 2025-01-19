@@ -13,7 +13,6 @@ match_data = json.load(json_file)
 with sqlite3.connect('./Questions/1/example.db') as conn:
     cursor = conn.cursor()
 
-    # Create customers table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS event (
             id INTEGER PRIMARY KEY,
@@ -25,6 +24,13 @@ with sqlite3.connect('./Questions/1/example.db') as conn:
             location_y REAL NOT NULL,
             end_location_x REAL NOT NULL,
             end_location_y REAL NOT NULL
+        );
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS players (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
         );
     ''')
     
@@ -39,6 +45,14 @@ with sqlite3.connect('./Questions/1/example.db') as conn:
 
         eventType = event['type']['name'].lower()
 
+        cursor.execute('''
+          INSERT OR IGNORE INTO players (id, name)
+          VALUES (?, ?)
+        ''', (
+          event['player']['id'],
+          event['player']['name']
+        ))
+
         if eventType not in event:
             print(f'cannot find event details: {eventType}')
             cursor.execute('''
@@ -51,13 +65,13 @@ with sqlite3.connect('./Questions/1/example.db') as conn:
                 event['timestamp'],
                 event['location'][0],
                 event['location'][1],
-                event['location'][0],  # Default to same as start location if no end location
-                event['location'][1]   # Default to same as start location if no end location
+                event['location'][0],
+                event['location'][1]  
             ))
         else:
             print('found event')
-            end_location_x = event['location'][0]  # Default values
-            end_location_y = event['location'][1]  # Default values
+            end_location_x = event['location'][0]
+            end_location_y = event['location'][1] 
             
             if eventType in event and 'end_location' in event[eventType]:
                 end_location_x = event[eventType]['end_location'][0]
