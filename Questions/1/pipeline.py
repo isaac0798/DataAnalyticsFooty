@@ -52,7 +52,7 @@ for event in match_data:
               "location_y": event['location'][1],
               "end_location_x": event['location'][0],
               "end_location_y": event['location'][1]
-            })
+            }, on_conflict="uuid").execute()
         )
     else:
         print('found event')
@@ -74,5 +74,5 @@ for event in match_data:
               "location_y": event['location'][1],
               "end_location_x": end_location_x,
               "end_location_y": end_location_y
-            })
+            }, on_conflict="uuid").execute()
         )
