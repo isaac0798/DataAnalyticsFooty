@@ -37,31 +37,23 @@ for event in match_data:
         .upsert({"id": event['type']['id'], "name": event['type']['name']}, on_conflict="id")
         .execute()
     )
-    """ 
-
-    cursor.execute('''
-      INSERT OR IGNORE INTO type (id, name)
-      VALUES (?, ?)
-    ''', (
-      event['type']['id'],
-      event['type']['name']
-    ))
 
     if eventType not in event:
         print(f'cannot find event details: {eventType}')
-        cursor.execute('''
-            INSERT INTO event (uuid, type_id, player_id, timestamp, location_x, location_y, end_location_x, end_location_y)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            event['id'],
-            event['type']['id'],
-            event['player']['id'],
-            event['timestamp'],
-            event['location'][0],
-            event['location'][1],
-            event['location'][0],
-            event['location'][1]  
-        ))
+
+        response = (
+          supabase.table("event")
+            .upsert({
+              "uuid": event['id'],
+              "type_id": event['type']['id'],
+              "player_id": event['player']['id'],
+              "timestamp": event['timestamp'],
+              "location_x": event['location'][0],
+              "location_y": event['location'][1],
+              "end_location_x": event['location'][0],
+              "end_location_y": event['location'][1]
+            })
+        )
     else:
         print('found event')
         end_location_x = event['location'][0]
@@ -71,16 +63,16 @@ for event in match_data:
             end_location_x = event[eventType]['end_location'][0]
             end_location_y = event[eventType]['end_location'][1]
         
-        cursor.execute('''
-            INSERT INTO event (uuid, type_id, player_id, timestamp, location_x, location_y, end_location_x, end_location_y)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            event['id'],
-            event['type']['id'],
-            event['player']['id'],
-            event['timestamp'],
-            event['location'][0],
-            event['location'][1],
-            end_location_x,
-            end_location_y
-        ))  """
+        response = (
+          supabase.table("event")
+            .upsert({
+              "uuid": event['id'],
+              "type_id": event['type']['id'],
+              "player_id": event['player']['id'],
+              "timestamp": event['timestamp'],
+              "location_x": event['location'][0],
+              "location_y": event['location'][1],
+              "end_location_x": end_location_x,
+              "end_location_y": end_location_y
+            })
+        )
