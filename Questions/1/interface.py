@@ -53,10 +53,6 @@ ev = events.data[event[0]]
 im = Image.new(mode="RGB", size=(1200, 800), color=(0, 102, 0)) #size is pitch * 2 * 10
 draw = ImageDraw.Draw(im)
 draw.text((0, 0), f"{ev['timestamp']}_{ev['player_id']}_{ev['type_id']}_{ev['uuid']}")
-draw.circle([ev['location_x']*10, ev['location_y']]*10, 2, fill=(255, 255, 255, 255))
-
-draw.circle([ev['end_location_x']*10, ev['end_location_y']]*10, 2, fill=(255, 255, 255, 255))
-draw.line([(ev['location_x']*10, ev['location_y']*10), (ev['end_location_x']*10, ev['end_location_y']*10)], fill=(255, 255, 255, 255), width=1)
 
 im = arrowedLine(im, (ev['location_x']*10, ev['location_y']*10), (ev['end_location_x']*10, ev['end_location_y']*10), 1, (255, 255, 255))
 
