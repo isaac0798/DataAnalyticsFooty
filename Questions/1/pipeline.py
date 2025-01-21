@@ -4,7 +4,7 @@ import json
 import sqlite3
 from supabase import create_client, Client
 from dotenv import load_dotenv, dotenv_values 
-# loading variables from .env file
+
 load_dotenv()
 
 args = sys.argv[1:]
